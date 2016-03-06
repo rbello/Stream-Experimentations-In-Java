@@ -4,6 +4,7 @@ import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -21,6 +22,10 @@ public class Main {
 		displayDistinctVersions();
 		
 		displayAverageMovieCostByYears();
+		
+		displayMostExpensiveMovieByGenre();
+		
+		displayListOfAllRatings();
 		
 	}
 
@@ -175,5 +180,49 @@ public class Main {
 		}
 		System.out.println("That took " + ((System.nanoTime() - startTime) / 1000000l) + " milliseconds");
 	}
+	
+	/**
+	 * Affiche pour chaque genre le film le plus cher de cette catégorie.
+	 */
+	protected static void displayMostExpensiveMovieByGenre() {
+		long startTime = System.nanoTime();
+		try (Stream<Movie> stream = Movie.stream().parallel()) {
+			
+			stream
+				.collect(Collectors.groupingBy(movie -> movie.genre))
+				.forEach((genre, movies) -> {
+					Optional<Movie> movie = movies.stream().max((a, b) -> {
+						if (a.cost == b.cost) return 0;
+						return a.cost > b.cost ? 1 : -1;
+					});
+					System.out.println(genre + " = " + movie);
+				});
+			
+		}
+		System.out.println("That took " + ((System.nanoTime() - startTime) / 1000000l) + " milliseconds");
+	}
 
+	/**
+	 * Affiche sur une ligne tous les types de classifications (rating) des différents films.
+	 */
+	protected static void displayListOfAllRatings() {
+		long startTime = System.nanoTime();
+		
+		// Le fait d'ouvrir un flux dans un try permet d'automatiquement
+		// appeler le close() dessus à la fin du bloc
+		try (Stream<Movie> stream = Movie.stream().parallel()) {
+			
+			String list = stream
+				.map(movie -> movie.rating)
+				.distinct()
+				.reduce((a, b) -> a + " " + b)
+				.get();
+			
+			System.out.println(list);
+			
+		}
+		
+		System.out.println("That took " + ((System.nanoTime() - startTime) / 1000000l) + " milliseconds");
+	}
+	
 }
