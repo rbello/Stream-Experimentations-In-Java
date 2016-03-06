@@ -1,7 +1,9 @@
 package streams.java;
 
+import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -14,10 +16,47 @@ public class Main {
 		
 		displayTitlesWordsCountedAndOrdered();
 		
+		displayStudiosProductionsOutCounted();
+	
+		displayDistinctVersions();
+		
+		displayAverageMovieCostByYears();
+		
+	}
+
+	protected static void displayAverageMovieCostByYears() {
+		long startTime = System.nanoTime();
+		final NumberFormat formatter = NumberFormat.getNumberInstance();
+		
+		// On ouvre un flux de traitement parallélisable
+		try (Stream<Movie> stream = Movie.stream().parallel()) {
+			stream
+			
+				// On élimine le bruit
+				.filter(movie -> movie.year > 1000)
+			
+				// On associe à chaque année la liste des films parus cette année
+				// C'est à dire une Map<Integer, List<Movie>>
+				.collect(Collectors.groupingBy(movie -> movie.year))
+				
+				// On parcours la map
+				.forEach((year, movies) -> {
+					
+					// On calcule la moyenne du prix
+					double averageCost = movies.stream()
+						.filter(movie -> movie.cost > -1)
+						.collect(Collectors.averagingDouble(movie -> movie.cost));
+					
+					// Affichage en euros
+					System.out.println(String.format("%s = %s €", year, formatter.format(averageCost * 10000)));
+					
+				});
+		}
+		System.out.println("That took " + ((System.nanoTime() - startTime) / 1000000l) + " milliseconds");
 	}
 
 	/**
-	 * Affiche le nombre de films parus par années
+	 * Affiche le nombre de films parus par années, classés par nombre de parutions croissant
 	 */
 	protected static void displayCountedByYears() {
 		
@@ -25,9 +64,9 @@ public class Main {
 		
 		// Le fait d'ouvrir un flux dans un try permet d'automatiquement
 		// appeler le close() dessus à la fin du bloc
-		try (Stream<Movie> s = Movie.stream().parallel()) {
+		try (Stream<Movie> stream = Movie.stream().parallel()) {
 			
-			Map<Integer, Long> countedByYears = s
+			Map<Integer, Long> countedByYears = stream
 					.collect(Collectors.groupingBy(movie -> movie.year, Collectors.counting()));
 			
 			new TreeMap<Integer, Long>(countedByYears)
@@ -81,6 +120,60 @@ public class Main {
 		
 		System.out.println("That took " + ((System.nanoTime() - startTime) / 1000000l) + " milliseconds");
 		
+	}
+	
+	/**
+	 * Affiche les 50 premiers studios en nombre de parutions de films
+	 */
+	protected static void displayStudiosProductionsOutCounted() {
+		long startTime = System.nanoTime();
+		
+		// On ouvre un flux de traitement parallélisable
+		try (Stream<Movie> stream = Movie.stream().parallel()) {
+			
+			final String status = "Out";
+			
+			stream
+			
+				// On filtre les films sortis uniquement
+				.filter(movie -> Objects.equals(movie.status, status))
+				
+				// On groupe par nom de studio 
+				.collect(Collectors.groupingBy(movie -> movie.studio, Collectors.counting()))
+				
+				// On travail sur le flux d'EntrySet
+				.entrySet().stream()
+				
+				// On classe par nombre de films croissant
+				.sorted((a, b) -> a.getValue().compareTo(b.getValue()) * -1)
+				
+				// Limité aux 50 premiers
+				.limit(50)
+				
+				// On affiche
+				.forEachOrdered(entry -> System.out.println(entry.getKey() + " = " + entry.getValue()));
+		}
+		
+		System.out.println("That took " + ((System.nanoTime() - startTime) / 1000000l) + " milliseconds");
+	}
+	
+	/**
+	 * Affiche les différentes versions existantes
+	 */
+	protected static void displayDistinctVersions() {
+		long startTime = System.nanoTime();
+		try (Stream<Movie> stream = Movie.stream().parallel()) {
+			
+			stream
+				// On recupère les différentes versions, pour cela on transforme le flux
+				.flatMap(movie -> Arrays.asList(movie.versions.split(",")).stream().map(version -> version.trim()))
+				// On supprime les doublons
+				.distinct()
+				// On affiche
+				.forEach(System.out::println);
+			
+		}
+		System.out.println("That took " + ((System.nanoTime() - startTime) / 1000000l) + " milliseconds");
 	}
 
 }

@@ -16,7 +16,7 @@ public class Movie {
 	public final String status;
 	public final String sound;
 	public final String versions;
-	public final String price;
+	public final double cost;
 	public final String rating;
 	public final int year;
 	public final String genre;
@@ -30,7 +30,7 @@ public class Movie {
 		status 		= format(tokens[3]);
 		sound 		= format(tokens[4]);
 		versions 	= format(tokens[5]);
-		price 		= format(tokens[6]);
+		cost 		= formatDouble(tokens[6]);
 		rating 		= format(tokens[7]);
 		year 		= formatInt(tokens[8]);
 		genre 		= format(tokens[9]);
@@ -46,10 +46,24 @@ public class Movie {
 			return -1;
 		}
 	}
+	
+	private static double formatDouble(String string) {
+		string = format(string);
+		try {
+			return Double.parseDouble(string);
+		}
+		catch (Exception ex) {
+			return -1;
+		}
+	}
 
 	private static String format(String string) {
-		if (string.length() < 3) return "";
-		return string.substring(1, string.length() - 1);
+		if ("".equals(string)) return string;
+		if ("\"".equals(string.substring(0, 1))) {
+			if (string.length() < 3) return "";
+			return string.substring(1, string.length() - 1);
+		}
+		return string;
 	}
 
 	@Override
