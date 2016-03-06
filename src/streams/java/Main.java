@@ -2,16 +2,23 @@ package streams.java;
 
 import java.text.NumberFormat;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 public class Main {
 
 	public static void main(String[] args) {
+		
+		displayEvenNumbersInRange();
+		
+		displayParallelThreads();
 
 		displayCountedByYears();
 		
@@ -29,6 +36,29 @@ public class Main {
 		
 	}
 
+	/**
+	 * Affiche les 100 premiers nombres paires à partir de 1
+	 */
+	protected static void displayEvenNumbersInRange() {
+		LongStream infiniteStream = LongStream.iterate(1, el -> el + 1);
+		infiniteStream.filter(el -> el % 2 == 0).limit(100).forEach(System.out::println);
+	}
+
+	/**
+	 * Effectue une énumération et affiche le nombre d'éléments traités sur chaque thread parallélisé.
+	 */
+	protected static void displayParallelThreads() {
+		Map<String, List<Integer>> numbersPerThread = IntStream.rangeClosed(1, 160)
+                .parallel()
+                .boxed()
+                .collect(Collectors.groupingBy(i -> Thread.currentThread().getName()));
+
+        numbersPerThread.forEach((k, v) -> System.out.println(String.format("%s >> %s", k, v)));
+	}
+
+	/**
+	 * Afficher la moyenne des coûts des films par année.
+	 */
 	protected static void displayAverageMovieCostByYears() {
 		long startTime = System.nanoTime();
 		final NumberFormat formatter = NumberFormat.getNumberInstance();
