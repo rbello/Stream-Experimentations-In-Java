@@ -40,8 +40,14 @@ public class Main {
 	 * Affiche les 100 premiers nombres paires à partir de 1
 	 */
 	protected static void displayEvenNumbersInRange() {
+		
 		LongStream infiniteStream = LongStream.iterate(1, el -> el + 1);
-		infiniteStream.filter(el -> el % 2 == 0).limit(100).forEach(System.out::println);
+		
+		infiniteStream
+			.filter(el -> el % 2 == 0)
+			.limit(100)
+			.forEach(System.out::println);
+		
 	}
 
 	/**
@@ -53,7 +59,7 @@ public class Main {
                 .boxed()
                 .collect(Collectors.groupingBy(i -> Thread.currentThread().getName()));
 
-        numbersPerThread.forEach((k, v) -> System.out.println(String.format("%s >> %s", k, v)));
+        numbersPerThread.forEach((value, thread) -> System.out.println(String.format("%s >> %s", value, thread)));
 	}
 
 	/**
