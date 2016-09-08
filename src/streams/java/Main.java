@@ -37,7 +37,7 @@ public class Main {
 	}
 
 	/**
-	 * Affiche les 100 premiers nombres paires à partir de 1
+	 * Affiche les 100 premiers nombres paires Ã  partir de 1
 	 */
 	protected static void displayEvenNumbersInRange() {
 		
@@ -51,7 +51,7 @@ public class Main {
 	}
 
 	/**
-	 * Effectue une énumération et affiche le nombre d'éléments traités sur chaque thread parallélisé.
+	 * Effectue une Ã©numÃ©ration et affiche le nombre d'Ã©lÃ©ments traitÃ©s sur chaque thread parallÃ©lisÃ©.
 	 */
 	protected static void displayParallelThreads() {
 		Map<String, List<Integer>> numbersPerThread = IntStream.rangeClosed(1, 160)
@@ -59,25 +59,25 @@ public class Main {
                 .boxed()
                 .collect(Collectors.groupingBy(i -> Thread.currentThread().getName()));
 
-        numbersPerThread.forEach((value, thread) -> System.out.println(String.format("%s >> %s", value, thread)));
+        	numbersPerThread.forEach((value, thread) -> System.out.println(String.format("%s >> %s", value, thread)));
 	}
 
 	/**
-	 * Afficher la moyenne des coûts des films par année.
+	 * Afficher la moyenne des coÃ»ts des films par annÃ©e.
 	 */
 	protected static void displayAverageMovieCostByYears() {
 		long startTime = System.nanoTime();
 		final NumberFormat formatter = NumberFormat.getNumberInstance();
 		
-		// On ouvre un flux de traitement parallélisable
+		// On ouvre un flux de traitement parallÃ©lisable
 		try (Stream<Movie> stream = Movie.stream().parallel()) {
 			stream
 			
-				// On élimine le bruit
+				// On Ã©limine le bruit
 				.filter(movie -> movie.year > 1000)
 			
-				// On associe à chaque année la liste des films parus cette année
-				// C'est à dire une Map<Integer, List<Movie>>
+				// On associe Ã  chaque annÃ©e la liste des films parus cette annÃ©e
+				// C'est Ã  dire une Map<Integer, List<Movie>>
 				.collect(Collectors.groupingBy(movie -> movie.year))
 				
 				// On parcours la map
@@ -89,7 +89,7 @@ public class Main {
 						.collect(Collectors.averagingDouble(movie -> movie.cost));
 					
 					// Affichage en euros
-					System.out.println(String.format("%s = %s €", year, formatter.format(averageCost * 10000)));
+					System.out.println(String.format("%s = %s â‚¬", year, formatter.format(averageCost * 10000)));
 					
 				});
 		}
@@ -97,14 +97,14 @@ public class Main {
 	}
 
 	/**
-	 * Affiche le nombre de films parus par années, classés par nombre de parutions croissant
+	 * Affiche le nombre de films parus par annÃ©es, classÃ©s par nombre de parutions croissant
 	 */
 	protected static void displayCountedByYears() {
 		
 		long startTime = System.nanoTime();
 		
 		// Le fait d'ouvrir un flux dans un try permet d'automatiquement
-		// appeler le close() dessus à la fin du bloc
+		// appeler le close() dessus Ã  la fin du bloc
 		try (Stream<Movie> stream = Movie.stream().parallel()) {
 			
 			Map<Integer, Long> countedByYears = stream
@@ -120,27 +120,27 @@ public class Main {
 	}
 	
 	/**
-	 * Affiche l'ensemble des différents mots utilisés dans les titres des films, et compte
-	 * leurs occurences. Les mots clés sont triés par nombre croissant d'occurences.
+	 * Affiche l'ensemble des diffÃ©rents mots utilisÃ©s dans les titres des films, et compte
+	 * leurs occurences. Les mots clÃ©s sont triÃ©s par nombre croissant d'occurences.
 	 */
 	protected static void displayTitlesWordsCountedAndOrdered() {
 		
 		long startTime = System.nanoTime();
 		
-		// On ouvre un flux de traitement parallélisable
+		// On ouvre un flux de traitement parallÃ©lisable
 		try (Stream<Movie> stream = Movie.stream().parallel()) {
 			
 			stream
 			
-				// Pour chaque film on recupère la liste des mots du titre, sous forme de String[]
+				// Pour chaque film on recupÃ¨re la liste des mots du titre, sous forme de String[]
 				.map(movie -> movie.title.trim().split("\\s+"))
 				
-				// On refait une liste unique à partir des différents tableaux de string
+				// On refait une liste unique Ã  partir des diffÃ©rents tableaux de string
 				.flatMap(words -> Arrays.asList(words).stream())
 				
-				// On collecte les données sous forme de map
+				// On collecte les donnÃ©es sous forme de map
 				.collect(Collectors.groupingBy(
-						// Les clés sont les mots des noms des films, avec un petit nettoyage
+						// Les clÃ©s sont les mots des noms des films, avec un petit nettoyage
 						word -> word.replaceAll("[^A-Za-z0-9 ]", ""),
 						// Les valeurs sont les nombres d'occurences de ces mots
 						Collectors.counting()))
@@ -148,13 +148,13 @@ public class Main {
 				// On va travailler maintenant sur le flux de EntrySet et non plus sur la map produite
 				.entrySet().stream()
 				
-				// On filtre les mots dont la taille est supérieure à 2
+				// On filtre les mots dont la taille est supÃ©rieure Ã  2
 				.filter(entry -> entry.getKey().length() > 2)
 				
 				// On trie par nombre d'occurence
 				.sorted(Map.Entry.comparingByValue())
 				
-				// On affiche enfin le résultat
+				// On affiche enfin le rÃ©sultat
 				.forEach((entry) -> System.out.println(entry.getKey() + " = " + entry.getValue()));
 			
 		}
@@ -169,7 +169,7 @@ public class Main {
 	protected static void displayStudiosProductionsOutCounted() {
 		long startTime = System.nanoTime();
 		
-		// On ouvre un flux de traitement parallélisable
+		// On ouvre un flux de traitement parallÃ©lisable
 		try (Stream<Movie> stream = Movie.stream().parallel()) {
 			
 			final String status = "Out";
@@ -188,7 +188,7 @@ public class Main {
 				// On classe par nombre de films croissant
 				.sorted((a, b) -> a.getValue().compareTo(b.getValue()) * -1)
 				
-				// Limité aux 50 premiers
+				// LimitÃ© aux 50 premiers
 				.limit(50)
 				
 				// On affiche
@@ -199,14 +199,14 @@ public class Main {
 	}
 	
 	/**
-	 * Affiche les différentes versions existantes
+	 * Affiche les diffÃ©rentes versions existantes
 	 */
 	protected static void displayDistinctVersions() {
 		long startTime = System.nanoTime();
 		try (Stream<Movie> stream = Movie.stream().parallel()) {
 			
 			stream
-				// On recupère les différentes versions, pour cela on transforme le flux
+				// On recupÃ¨re les diffÃ©rentes versions, pour cela on transforme le flux
 				.flatMap(movie -> Arrays.asList(movie.versions.split(",")).stream().map(version -> version.trim()))
 				// On supprime les doublons
 				.distinct()
@@ -218,7 +218,7 @@ public class Main {
 	}
 	
 	/**
-	 * Affiche pour chaque genre le film le plus cher de cette catégorie.
+	 * Affiche pour chaque genre le film le plus cher de cette catÃ©gorie.
 	 */
 	protected static void displayMostExpensiveMovieByGenre() {
 		long startTime = System.nanoTime();
@@ -239,13 +239,13 @@ public class Main {
 	}
 
 	/**
-	 * Affiche sur une ligne tous les types de classifications (rating) des différents films.
+	 * Affiche sur une ligne tous les types de classifications (rating) des diffÃ©rents films.
 	 */
 	protected static void displayListOfAllRatings() {
 		long startTime = System.nanoTime();
 		
 		// Le fait d'ouvrir un flux dans un try permet d'automatiquement
-		// appeler le close() dessus à la fin du bloc
+		// appeler le close() dessus Ã  la fin du bloc
 		try (Stream<Movie> stream = Movie.stream().parallel()) {
 			
 			String list = stream
